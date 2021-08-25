@@ -29,7 +29,7 @@ pub struct ODBCConnection<'a>(Connection<'a>);
 unsafe impl Send for ODBCConnection<'static> {}
 
 impl<'a> ODBCConnection<'a> {
-    pub fn raw(&self) -> &Connection {
+    pub fn raw(&self) -> &Connection<'a> {
         &self.0
     }
 }
