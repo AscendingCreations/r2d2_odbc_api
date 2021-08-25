@@ -24,12 +24,12 @@ pub struct ODBCConnectionManager {
     connection_string: String,
 }
 
-pub struct ODBCConnection<'a>(Connection<'a>);
+pub struct ODBCConnection(Connection<'static>);
 
-unsafe impl Send for ODBCConnection<'static> {}
+unsafe impl Send for ODBCConnection {}
 
-impl<'a> ODBCConnection<'a> {
-    pub fn raw(&self) -> &Connection<'a> {
+impl ODBCConnection {
+    pub fn raw(&self) -> &Connection<'static> {
         &self.0
     }
 }
@@ -135,12 +135,12 @@ impl ODBCConnectionManager {
 ///}
 /// ```
 impl r2d2::ManageConnection for ODBCConnectionManager {
-    type Connection = ODBCConnection<'static>;
+    type Connection = ODBCConnection;
     type Error = ODBCError;
 
     fn connect(&self) -> std::result::Result<Self::Connection, Self::Error> {
         let env = &ENV.0;
-        Ok(ODBCConnection::<'static>(
+        Ok(ODBCConnection(
             env.connect_with_connection_string(&self.connection_string)?,
         ))
     }
@@ -157,7 +157,7 @@ impl r2d2::ManageConnection for ODBCConnectionManager {
 }
 
 #[cfg(feature = "rocket_pooling")]
-impl Poolable for ODBCConnection<'static> {
+impl Poolable for ODBCConnection {
     type Manager = ODBCConnectionManager;
     type Error = std::convert::Infallible;
 
