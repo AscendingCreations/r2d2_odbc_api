@@ -1,0 +1,26 @@
+[package]
+name = "r2d2_odbc_api"
+version = "0.1.0"
+authors = ["Andrew Wheeler <genusistimelord@gmail.com>"]
+license = "MIT"
+description = "ODBC support for the r2d2 connection pool Via odbc-api Based on https://github.com/Koka/r2d2-odbc"
+repository = "https://github.com/genusistimelord/r2d2-odbc_api"
+documentation = "https://docs.rs/r2d2_odbc_api"
+homepage = "https://github.com/genusistimelord/r2d2-odbc_api"
+keywords = ["odbc", "sql", "pool", "database", "r2d2", "odbc-api"]
+categories = ["database"]
+
+[lib]
+name = "r2d2_odbc_api"
+path = "src/lib.rs"
+test = false
+
+[[test]]
+name = "test"
+path = "tests/test.rs"
+
+[dependencies]
+lazy_static = "1.4"
+r2d2 = "0.8"
+odbc-api = "0.26.0"
+anyhow = "1.0.43"
