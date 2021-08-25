@@ -9,8 +9,15 @@ extern crate r2d2;
 #[macro_use]
 extern crate lazy_static;
 
+pub use odbc_api::*;
 use std::error::Error;
 use std::fmt;
+
+#[cfg(feature = "rocket_pooling")]
+extern crate rocket_sync_db_pools;
+use rocket_sync_db_pools::{Config, PoolResult, Poolable};
+extern crate rocket;
+use rocket::{Build, Rocket};
 
 #[derive(Debug)]
 pub struct ODBCConnectionManager {
@@ -146,5 +153,19 @@ impl r2d2::ManageConnection for ODBCConnectionManager {
 
     fn has_broken(&self, _conn: &mut Self::Connection) -> bool {
         false
+    }
+}
+
+#[cfg(feature = "rocket_pooling")]
+impl Poolable for ODBCConnection<'static> {
+    type Manager = ODBCConnectionManager;
+    type Error = std::convert::Infallible;
+
+    fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
+        let config = Config::from(db_name, rocket)?;
+        let manager = ODBCConnectionManager::new(&config.url);
+        Ok(r2d2::Pool::builder()
+            .max_size(config.pool_size)
+            .build(manager)?)
     }
 }
