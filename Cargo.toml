@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = ["Andrew Wheeler <genusistimelord@gmail.com>"]
 license = "MIT"
 description = "ODBC support for the r2d2 connection pool Via odbc-api Based on https://github.com/Koka/r2d2-odbc"
-repository = "https://github.com/genusistimelord/r2d2-odbc_api"
+repository = "https://github.com/genusistimelord/r2d2_odbc_api"
 documentation = "https://docs.rs/r2d2_odbc_api"
-homepage = "https://github.com/genusistimelord/r2d2-odbc_api"
+homepage = "https://github.com/genusistimelord/r2d2_odbc_api"
 keywords = ["odbc", "sql", "pool", "database", "r2d2"]
 categories = ["database"]
 
