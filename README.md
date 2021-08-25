@@ -1,7 +1,7 @@
 # r2d2-odbc-api
 [ODBC](https://github.com/pacman82/odbc-api) adapter for [r2d2](https://github.com/sfackler/r2d2) connection pool
 
-[![https://app.travis-ci.com/github/genusistimelord/r2d2_odbc_api](https://app.travis-ci.com/github/genusistimelord/r2d2_odbc_api.svg?branch=main)](https://app.travis-ci.com/github/genusistimelord/r2d2_odbc_api)
+[![https://app.travis-ci.com/github/genusistimelord/r2d2_odbc_api](https://api.travis-ci.com/genusistimelord/r2d2_odbc_api.svg?branch=main)](https://app.travis-ci.com/github/genusistimelord/r2d2_odbc_api)
 [![https://crates.io/crates/r2d2_odbc_api](https://img.shields.io/badge/crates.io-v0.1.0-blue)](https://crates.io/crates/r2d2_odbc_api)
 [![Docs](https://docs.rs/r2d2_odbc_api/badge.svg)](https://docs.rs/r2d2_odbc_api)
 
