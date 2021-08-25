@@ -140,7 +140,7 @@ impl r2d2::ManageConnection for ODBCConnectionManager {
 
     fn connect(&self) -> std::result::Result<Self::Connection, Self::Error> {
         let env = &ENV.0;
-        Ok(ODBCConnection(
+        Ok(ODBCConnection::<'static>(
             env.connect_with_connection_string(&self.connection_string)?,
         ))
     }
