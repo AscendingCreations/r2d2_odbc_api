@@ -34,22 +34,16 @@ impl ODBCConnection {
     }
 }
 
-pub struct ODBCEnv(Environment);
-
-unsafe impl Sync for ODBCEnv {}
-
-unsafe impl Send for ODBCEnv {}
-
 #[derive(Debug)]
 pub struct ODBCError(Box<dyn Error>);
 
 lazy_static! {
-    static ref ENV: ODBCEnv = unsafe {
+    static ref ENV: Environment = unsafe {
         Environment::set_connection_pooling(AttrConnectionPooling::DriverAware).unwrap();
         let mut env = Environment::new().unwrap();
         env.set_connection_pooling_matching(AttrCpMatch::Strict)
             .unwrap();
-        ODBCEnv(env)
+        env
     };
 }
 
@@ -139,7 +133,7 @@ impl r2d2::ManageConnection for ODBCConnectionManager {
     type Error = ODBCError;
 
     fn connect(&self) -> std::result::Result<Self::Connection, Self::Error> {
-        let env = &ENV.0;
+        let env = &ENV;
         Ok(ODBCConnection(
             env.connect_with_connection_string(&self.connection_string)?,
         ))
