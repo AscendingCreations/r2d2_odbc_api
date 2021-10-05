@@ -10,8 +10,6 @@ extern crate r2d2;
 extern crate lazy_static;
 
 pub use odbc_api::*;
-use std::error::Error;
-use std::fmt;
 
 #[cfg(feature = "rocket_pooling")]
 extern crate rocket_sync_db_pools;
@@ -32,9 +30,6 @@ impl ODBCConnection {
     }
 }
 
-#[derive(Debug)]
-pub struct ODBCError(Box<dyn Error>);
-
 lazy_static! {
     static ref ENV: Environment = unsafe {
         Environment::set_connection_pooling(AttrConnectionPooling::DriverAware).unwrap();
@@ -43,30 +38,6 @@ lazy_static! {
             .unwrap();
         env
     };
-}
-
-impl Error for ODBCError {
-    fn description(&self) -> &str {
-        "Error connecting to Database"
-    }
-}
-
-impl fmt::Display for ODBCError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl<E: 'static> From<std::sync::PoisonError<E>> for ODBCError {
-    fn from(err: std::sync::PoisonError<E>) -> Self {
-        ODBCError(Box::new(err))
-    }
-}
-
-impl From<odbc_api::Error> for ODBCError {
-    fn from(err: odbc_api::Error) -> Self {
-        ODBCError(Box::new(err))
-    }
 }
 
 impl ODBCConnectionManager {
@@ -128,7 +99,7 @@ impl ODBCConnectionManager {
 /// ```
 impl r2d2::ManageConnection for ODBCConnectionManager {
     type Connection = ODBCConnection;
-    type Error = ODBCError;
+    type Error = odbc_api::Error;
 
     fn connect(&self) -> std::result::Result<Self::Connection, Self::Error> {
         let env = &ENV;
