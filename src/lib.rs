@@ -10,8 +10,6 @@ extern crate r2d2;
 extern crate lazy_static;
 
 pub use odbc_api::*;
-use std::error::Error;
-use std::fmt;
 
 #[cfg(feature = "rocket_pooling")]
 extern crate rocket_sync_db_pools;
@@ -24,9 +22,7 @@ pub struct ODBCConnectionManager {
     connection_string: String,
 }
 
-pub struct ODBCConnection(Connection<'static>);
-
-unsafe impl Send for ODBCConnection {}
+pub struct ODBCConnection(odbc_api::force_send_sync::Send<Connection<'static>>);
 
 impl ODBCConnection {
     pub fn raw(&self) -> &Connection<'static> {
@@ -34,47 +30,14 @@ impl ODBCConnection {
     }
 }
 
-pub struct ODBCEnv(Environment);
-
-unsafe impl Sync for ODBCEnv {}
-
-unsafe impl Send for ODBCEnv {}
-
-#[derive(Debug)]
-pub struct ODBCError(Box<dyn Error>);
-
 lazy_static! {
-    static ref ENV: ODBCEnv = unsafe {
+    static ref ENV: Environment = unsafe {
         Environment::set_connection_pooling(AttrConnectionPooling::DriverAware).unwrap();
         let mut env = Environment::new().unwrap();
         env.set_connection_pooling_matching(AttrCpMatch::Strict)
             .unwrap();
-        ODBCEnv(env)
+        env
     };
-}
-
-impl Error for ODBCError {
-    fn description(&self) -> &str {
-        "Error connecting to Database"
-    }
-}
-
-impl fmt::Display for ODBCError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl<E: 'static> From<std::sync::PoisonError<E>> for ODBCError {
-    fn from(err: std::sync::PoisonError<E>) -> Self {
-        ODBCError(Box::new(err))
-    }
-}
-
-impl From<odbc_api::Error> for ODBCError {
-    fn from(err: odbc_api::Error) -> Self {
-        ODBCError(Box::new(err))
-    }
 }
 
 impl ODBCConnectionManager {
@@ -136,13 +99,20 @@ impl ODBCConnectionManager {
 /// ```
 impl r2d2::ManageConnection for ODBCConnectionManager {
     type Connection = ODBCConnection;
-    type Error = ODBCError;
+    type Error = odbc_api::Error;
 
     fn connect(&self) -> std::result::Result<Self::Connection, Self::Error> {
-        let env = &ENV.0;
-        Ok(ODBCConnection(
-            env.connect_with_connection_string(&self.connection_string)?,
-        ))
+        let env = &ENV;
+        let conn = env.connect_with_connection_string(&self.connection_string)?;
+        // Promoting a connection to send is unsafe, since not every ODBC driver is thread safe.
+        // Actual thread safety for unixODBC may also depend on the threading level defined for the
+        // ODBC driver. Here we assume that the user conciously checked the safety of the
+        // application and checked into sending connection then the ODBConnectionManager has been
+        // constructed.
+        let conn = unsafe {
+            conn.promote_to_send()
+        };
+        Ok(ODBCConnection(conn))
     }
 
     fn is_valid(&self, conn: &mut Self::Connection) -> std::result::Result<(), Self::Error> {
