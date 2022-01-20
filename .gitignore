@@ -2,7 +2,7 @@
 .idea
 *.iml
 
-/target/
+target/
 **/*.rs.bk
 Cargo.lock
 /.vscode
