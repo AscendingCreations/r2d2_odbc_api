@@ -32,7 +32,7 @@ impl ODBCConnection {
 
 lazy_static! {
     static ref ENV: Environment = unsafe {
-        Environment::set_connection_pooling(AttrConnectionPooling::DriverAware).unwrap();
+        Environment::set_connection_pooling(AttrConnectionPooling::OnePerDriver).unwrap();
         let mut env = Environment::new().unwrap();
         env.set_connection_pooling_matching(AttrCpMatch::Strict)
             .unwrap();
