@@ -10,7 +10,7 @@ use std::thread;
 
 #[test]
 fn test_smoke() {
-    let manager = ODBCConnectionManager::new("DSN=PostgreSQL");
+    let manager = ODBCConnectionManager::new("DSN=PostgreSQL", 5);
     let pool = Pool::builder().max_size(2).build(manager).unwrap();
 
     let (s1, r1) = mpsc::channel();

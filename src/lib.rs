@@ -2,12 +2,14 @@
 extern crate odbc_api;
 use odbc_api::{
     sys::{AttrConnectionPooling, AttrCpMatch},
-    Connection, Environment,
+    Environment,
 };
 extern crate r2d2;
 
 #[macro_use]
 extern crate lazy_static;
+extern crate crossbeam_queue;
+extern crate thiserror;
 
 pub use odbc_api::*;
 
@@ -16,36 +18,39 @@ extern crate rocket_sync_db_pools;
 use rocket_sync_db_pools::{Config, PoolResult, Poolable};
 extern crate rocket;
 use rocket::{Build, Rocket};
+use std::sync::Arc;
 
-#[derive(Debug)]
+mod pool;
+
+use pool::{ODBCConnection, SharedPool};
+
+#[derive(Clone)]
 pub struct ODBCConnectionManager {
-    connection_string: String,
-}
-
-pub struct ODBCConnection(odbc_api::force_send_sync::Send<Connection<'static>>);
-
-impl ODBCConnection {
-    pub fn raw(&self) -> &Connection<'static> {
-        &self.0
-    }
+    pub(crate) shared: Arc<SharedPool>,
 }
 
 lazy_static! {
-    static ref ENV: Environment = unsafe {
-        Environment::set_connection_pooling(AttrConnectionPooling::DriverAware).unwrap();
-        let mut env = Environment::new().unwrap();
-        env.set_connection_pooling_matching(AttrCpMatch::Strict)
-            .unwrap();
-        env
+    static ref ENV: Environment = {
+        //unsafe {
+        //    Environment::set_connection_pooling(AttrConnectionPooling::).unwrap();
+        //}
+
+        Environment::new().unwrap()
+        //env.set_connection_pooling_matching(AttrCpMatch::Strict)
+            //.unwrap();
     };
 }
 
 impl ODBCConnectionManager {
     /// Creates a new `ODBCConnectionManager`.
-    pub fn new<S: Into<String>>(connection_string: S) -> ODBCConnectionManager {
+    pub fn new<S: Into<String>>(connection_string: S, limit: u32) -> ODBCConnectionManager {
         ODBCConnectionManager {
-            connection_string: connection_string.into(),
+            shared: SharedPool::new_arc(connection_string.into(), limit),
         }
+    }
+
+    pub fn aquire(&self) -> ODBCConnection {
+        self.shared.aquire().unwrap()
     }
 }
 
@@ -66,7 +71,7 @@ impl ODBCConnectionManager {
 ///use std::thread;
 ///
 ///fn main() -> Result<(), Error> {
-///    let manager = ODBCConnectionManager::new("DRIVER={SQL Server};SERVER=usmikzo-db01");
+///    let manager = ODBCConnectionManager::new("DRIVER={SQL Server};SERVER=usmikzo-db01", 5);
 ///    let pool = r2d2::Pool::new(manager).unwrap();
 ///
 ///    let mut children = vec![];
@@ -99,25 +104,15 @@ impl ODBCConnectionManager {
 /// ```
 impl r2d2::ManageConnection for ODBCConnectionManager {
     type Connection = ODBCConnection;
-    type Error = odbc_api::Error;
+    type Error = pool::OdbcError;
 
     fn connect(&self) -> std::result::Result<Self::Connection, Self::Error> {
-        let env = &ENV;
-        let conn = env.connect_with_connection_string(&self.connection_string)?;
-        // Promoting a connection to send is unsafe, since not every ODBC driver is thread safe.
-        // Actual thread safety for unixODBC may also depend on the threading level defined for the
-        // ODBC driver. Here we assume that the user conciously checked the safety of the
-        // application and checked into sending connection then the ODBConnectionManager has been
-        // constructed.
-        let conn = unsafe {
-            conn.promote_to_send()
-        };
-        Ok(ODBCConnection(conn))
+        self.shared.aquire()
     }
 
     fn is_valid(&self, conn: &mut Self::Connection) -> std::result::Result<(), Self::Error> {
         //Will work for most Databases If we encounter others we could try a different approach.
-        conn.0.execute("SELECT 1;", ())?;
+        conn.execute("SELECT 1;", ())?;
         Ok(())
     }
 
@@ -133,7 +128,7 @@ impl Poolable for ODBCConnection {
 
     fn pool(db_name: &str, rocket: &Rocket<Build>) -> PoolResult<Self> {
         let config = Config::from(db_name, rocket)?;
-        let manager = ODBCConnectionManager::new(&config.url);
+        let manager = ODBCConnectionManager::new(&config.url, config.pool_size);
         Ok(r2d2::Pool::builder()
             .max_size(config.pool_size)
             .build(manager)?)
