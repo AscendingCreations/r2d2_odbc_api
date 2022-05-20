@@ -20,17 +20,20 @@ use std::str;
 use std::thread;
 
 fn main() -> Result<(), Error> {
-    let manager = ODBCConnectionManager::new("DSN=PostgreSQL");
-    let pool = r2d2::Pool::new(manager).unwrap();
+    let max_pool_size = 10;
+    let manager = ODBCConnectionManager::new("DSN=PostgreSQL", max_pool_size);
+    let pool = r2d2::Pool::builder()
+        .max_size(max_pool_size)
+        .build(manager)
+        .unwrap();
 
     let mut children = vec![];
     for i in 0..10i32 {
         let pool = pool.clone();
         children.push(thread::spawn(move || {
             let pool_conn = pool.get().unwrap();
-            let conn = pool_conn.raw();
 
-            if let Some(cursor) = conn.execute("SELECT version()", ()).unwrap() {
+            if let Some(cursor) = pool_conn.execute("SELECT version()", ()).unwrap() {
                 let mut buffers =
                     buffers::TextRowSet::for_cursor(5000, &cursor, Some(4096)).unwrap();
                 let mut row_set_cursor = cursor.bind_buffer(&mut buffers).unwrap();
