@@ -1,9 +1,6 @@
 //! ODBC support for the `r2d2` connection pool Via odbc-api.
 extern crate odbc_api;
-use odbc_api::{
-    sys::{AttrConnectionPooling, AttrCpMatch},
-    Environment,
-};
+use odbc_api::Environment;
 extern crate r2d2;
 
 #[macro_use]

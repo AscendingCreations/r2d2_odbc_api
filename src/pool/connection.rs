@@ -9,7 +9,6 @@ const DEREF_ERR: &str = "Connection already released to pool";
 pub struct ODBCConnection {
     pub connection: Option<Connection>,
     pub(crate) pool: Option<Arc<SharedPool>>,
-    pub reattach: bool,
 }
 
 impl ODBCConnection {
@@ -17,12 +16,10 @@ impl ODBCConnection {
         Self {
             connection: Some(connection),
             pool: Some(pool),
-            reattach: true,
         }
     }
 
     pub fn detach(mut self) -> Connection {
-        self.reattach = false;
         self.connection
             .take()
             .expect("PoolConnection double-dropped")
@@ -31,7 +28,7 @@ impl ODBCConnection {
 
 impl Drop for ODBCConnection {
     fn drop(&mut self) {
-        if self.connection.is_some() && self.pool.is_some() && self.reattach {
+        if self.connection.is_some() && self.pool.is_some() {
             let shared = self.pool.take().unwrap();
             let connection = self.connection.take().unwrap();
             let pool = shared.pool.lock().unwrap();
