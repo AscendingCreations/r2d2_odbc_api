@@ -23,9 +23,9 @@ fn main() -> Result<(), Error> {
         children.push(thread::spawn(move || {
             let pool_conn = pool.get().unwrap();
 
-            if let Some(cursor) = pool_conn.execute("SELECT version()", ()).unwrap() {
+            if let Some(mut cursor) = pool_conn.execute("SELECT version()", ()).unwrap() {
                 let mut buffers =
-                    buffers::TextRowSet::for_cursor(5000, &cursor, Some(4096)).unwrap();
+                    buffers::TextRowSet::for_cursor(5000, &mut cursor, Some(4096)).unwrap();
                 let mut row_set_cursor = cursor.bind_buffer(&mut buffers).unwrap();
 
                 while let Some(batch) = row_set_cursor.fetch().unwrap() {
