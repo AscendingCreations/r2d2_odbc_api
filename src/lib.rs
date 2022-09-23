@@ -12,9 +12,13 @@ pub use odbc_api::*;
 
 #[cfg(feature = "rocket_pooling")]
 extern crate rocket_sync_db_pools;
+#[cfg(feature = "rocket_pooling")]
 use rocket_sync_db_pools::{Config, PoolResult, Poolable};
+#[cfg(feature = "rocket_pooling")]
 extern crate rocket;
+#[cfg(feature = "rocket_pooling")]
 use rocket::{Build, Rocket};
+
 use std::sync::Arc;
 
 mod pool;
