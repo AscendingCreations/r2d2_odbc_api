@@ -33,6 +33,7 @@ thiserror = "1.0.35"
 default = ["rocket_pooling"]
 rocket_pooling = ["rocket", "rocket_sync_db_pools"]
 iodbc = ["odbc-api/iodbc"]
+hfsql = ["odbc-api/iodbc"]
 
 [package.metadata.docs.rs]
 features = ["rocket_pooling"]

@@ -113,6 +113,9 @@ impl r2d2::ManageConnection for ODBCConnectionManager {
 
     fn is_valid(&self, conn: &mut Self::Connection) -> std::result::Result<(), Self::Error> {
         //Will work for most Databases If we encounter others we could try a different approach.
+        #[cfg(feature = "hfsql")]
+        conn.execute("SELECT CURRENT_DATE FROM DUAL;", ())?;
+        #[cfg(not(feature = "hfsql"))]
         conn.execute("SELECT 1;", ())?;
         Ok(())
     }
