@@ -31,15 +31,7 @@ pub struct ODBCConnectionManager {
 }
 
 lazy_static! {
-    static ref ENV: Environment = {
-        //unsafe {
-        //    Environment::set_connection_pooling(AttrConnectionPooling::).unwrap();
-        //}
-
-        Environment::new().unwrap()
-        //env.set_connection_pooling_matching(AttrCpMatch::Strict)
-            //.unwrap();
-    };
+    static ref ENV: Environment = { Environment::new().unwrap() };
 }
 
 impl ODBCConnectionManager {
@@ -112,7 +104,6 @@ impl r2d2::ManageConnection for ODBCConnectionManager {
     }
 
     fn is_valid(&self, conn: &mut Self::Connection) -> std::result::Result<(), Self::Error> {
-        //Will work for most Databases If we encounter others we could try a different approach.
         #[cfg(feature = "hfsql")]
         conn.execute("SELECT CURRENT_DATE FROM DUAL;", ())?;
         #[cfg(not(feature = "hfsql"))]
