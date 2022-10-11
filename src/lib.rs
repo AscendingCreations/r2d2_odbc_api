@@ -31,7 +31,7 @@ pub struct ODBCConnectionManager {
 }
 
 lazy_static! {
-    static ref ENV: Environment = { Environment::new().unwrap() };
+    static ref ENV: Environment = Environment::new().unwrap();
 }
 
 impl ODBCConnectionManager {
