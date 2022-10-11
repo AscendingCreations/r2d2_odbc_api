@@ -1,10 +1,21 @@
-# r2d2-odbc-api
-[ODBC](https://github.com/pacman82/odbc-api) adapter for [r2d2](https://github.com/sfackler/r2d2) connection pool
+<h1 align="center">
+    r2d2-odbc-api
+</h1>
+<div align="center">
+    [ODBC](https://github.com/pacman82/odbc-api) adapter for [r2d2](https://github.com/sfackler/r2d2) connection pool with custom Pooling.
+</div>
+<br />
+<div align="center">
+    [![https://crates.io/crates/r2d2_odbc_api](https://img.shields.io/crates/v/r2d2_odbc_api?style=plastic)](https://crates.io/crates/r2d2_odbc_api)
+    [![Docs](https://docs.rs/r2d2_odbc_api/badge.svg)](https://docs.rs/r2d2_odbc_api)
+</div>
 
-[![https://crates.io/crates/r2d2_odbc_api](https://img.shields.io/badge/crates.io-v0.1.4-blue)](https://crates.io/crates/r2d2_odbc_api)
-[![Docs](https://docs.rs/r2d2_odbc_api/badge.svg)](https://docs.rs/r2d2_odbc_api)
+## License
 
-Example:
+This project is licensed under either [Apache License, Version 2.0](LICENSE-APACHE), [zlib License](LICENSE-ZLIB), or [MIT License](LICENSE-MIT), at your option.
+
+
+## Example
 
 ```rust
 
