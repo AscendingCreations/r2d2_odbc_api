@@ -1,10 +1,21 @@
-# r2d2-odbc-api
-[ODBC](https://github.com/pacman82/odbc-api) adapter for [r2d2](https://github.com/sfackler/r2d2) connection pool
+<h1 align="center">
+    r2d2-odbc-api
+</h1>
+<div align="center">
+    [ODBC](https://github.com/pacman82/odbc-api) adapter for [r2d2](https://github.com/sfackler/r2d2) connection pool with custom Pooling.
+</div>
+<br />
+<div align="center">
+    [![https://crates.io/crates/r2d2_odbc_api](https://img.shields.io/crates/v/r2d2_odbc_api?style=plastic)](https://crates.io/crates/r2d2_odbc_api)
+    [![Docs](https://docs.rs/r2d2_odbc_api/badge.svg)](https://docs.rs/r2d2_odbc_api)
+</div>
 
-[![https://crates.io/crates/r2d2_odbc_api](https://img.shields.io/badge/crates.io-v0.1.4-blue)](https://crates.io/crates/r2d2_odbc_api)
-[![Docs](https://docs.rs/r2d2_odbc_api/badge.svg)](https://docs.rs/r2d2_odbc_api)
+## License
 
-Example:
+This project is licensed under either [Apache License, Version 2.0](LICENSE-APACHE), [zlib License](LICENSE-ZLIB), or [MIT License](LICENSE-MIT), at your option.
+
+
+## Example
 
 ```rust
 
@@ -20,17 +31,20 @@ use std::str;
 use std::thread;
 
 fn main() -> Result<(), Error> {
-    let manager = ODBCConnectionManager::new("DSN=PostgreSQL");
-    let pool = r2d2::Pool::new(manager).unwrap();
+    let max_pool_size = 10;
+    let manager = ODBCConnectionManager::new("DSN=PostgreSQL", max_pool_size);
+    let pool = r2d2::Pool::builder()
+        .max_size(max_pool_size)
+        .build(manager)
+        .unwrap();
 
     let mut children = vec![];
     for i in 0..10i32 {
         let pool = pool.clone();
         children.push(thread::spawn(move || {
             let pool_conn = pool.get().unwrap();
-            let conn = pool_conn.raw();
 
-            if let Some(cursor) = conn.execute("SELECT version()", ()).unwrap() {
+            if let Some(cursor) = pool_conn.execute("SELECT version()", ()).unwrap() {
                 let mut buffers =
                     buffers::TextRowSet::for_cursor(5000, &cursor, Some(4096)).unwrap();
                 let mut row_set_cursor = cursor.bind_buffer(&mut buffers).unwrap();

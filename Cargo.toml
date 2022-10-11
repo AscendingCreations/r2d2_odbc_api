@@ -1,8 +1,8 @@
 [package]
 name = "r2d2_odbc_api"
-version = "0.1.4"
+version = "0.2.0"
 authors = ["Andrew Wheeler <genusistimelord@gmail.com>"]
-license = "MIT"
+license = "MIT OR Apache-2.0 OR Zlib"
 description = "ODBC support for the r2d2 connection pool Via odbc-api Based on https://github.com/Koka/r2d2-odbc"
 repository = "https://github.com/genusistimelord/r2d2_odbc_api"
 documentation = "https://docs.rs/r2d2_odbc_api"
@@ -20,17 +20,23 @@ name = "test"
 path = "tests/test.rs"
 
 [dependencies]
-lazy_static = "1.4"
-r2d2 = "0.8"
-odbc-api = "0.33"
-anyhow = "1.0"
-rocket = { version = "0.5.0-rc.1", optional = true }
-rocket_sync_db_pools = { version = "0.1.0-rc.1", optional = true }
+lazy_static = "1.4.0"
+r2d2 = "0.8.10"
+odbc-api = "0.50.0"
+rocket = { version = "0.5.0-rc.2", optional = true }
+rocket_sync_db_pools = { version = "0.1.0-rc.2", optional = true }
+crossbeam-queue = "0.3.6"
+thiserror = "1.0.37"
 
 [features]
 default = ["rocket_pooling"]
 rocket_pooling = ["rocket", "rocket_sync_db_pools"]
+iodbc = ["odbc-api/iodbc"]
+hfsql = ["odbc-api/iodbc"]
 
 [package.metadata.docs.rs]
 features = ["rocket_pooling"]
 no-default-features = false
+
+[dev-dependencies]
+anyhow = "1.0.65"
