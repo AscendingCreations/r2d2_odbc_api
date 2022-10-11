@@ -6,8 +6,9 @@
 </div>
 <br />
 <div align="center">
-    [![https://crates.io/crates/r2d2_odbc_api](https://img.shields.io/crates/v/r2d2_odbc_api?style=plastic)](https://crates.io/crates/r2d2_odbc_api)
-    [![Docs](https://docs.rs/r2d2_odbc_api/badge.svg)](https://docs.rs/r2d2_odbc_api)
+    <a href="https://crates.io/crates/r2d2_odbc_api"><img src="https://img.shields.io/crates/v/r2d2_odbc_api?style=plastic" alt="crates.io"></a>
+    <a href="https://docs.rs/r2d2_odbc_api"><img src="https://docs.rs/r2d2_odbc_api/badge.svg" alt="docs.rs"></a>
+    <img src="https://img.shields.io/badge/min%20rust-1.60-green.svg" alt="Minimum Rust Version">
 </div>
 
 ## License
