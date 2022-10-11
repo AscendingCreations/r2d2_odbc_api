@@ -67,7 +67,3 @@ fn main() -> Result<(), Error> {
 }
 
 ```
-
-
-# Contributors
-1. pacman82
