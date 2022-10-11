@@ -2,7 +2,7 @@
     r2d2-odbc-api
 </h1>
 <div align="center">
-    [ODBC](https://github.com/pacman82/odbc-api) adapter for [r2d2](https://github.com/sfackler/r2d2) connection pool with custom Pooling.
+    <a href="https://github.com/pacman82/odbc-api">[ODBC]</a> adapter for <a href="https://github.com/sfackler/r2d2">[r2d2]</a> connection pool with custom Pooling.
 </div>
 <br />
 <div align="center">
